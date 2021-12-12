@@ -1,4 +1,5 @@
 mod day1;
+mod day10;
 mod day2;
 mod day3;
 mod day4;
@@ -7,7 +8,6 @@ mod day6;
 mod day7;
 mod day8;
 mod day9;
-mod day10;
 
 fn main() {
     println!("****");
@@ -29,4 +29,5 @@ fn main() {
     println!("****");
     day9::display_smoke_risks();
     println!("****");
+    day10::print_syntax_check();
 }
