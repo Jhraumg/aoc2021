@@ -7,7 +7,6 @@ mod day6;
 mod day7;
 mod day8;
 
-
 fn main() {
     day1::print_depth_incrs();
     day2::print_position();

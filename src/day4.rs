@@ -7,36 +7,35 @@ pub struct BingoResult {
     winner_score: usize,
 }
 
-impl BingoResult {
-    pub fn new() -> Self {
-        Self {
-            winner_score: 0,
-            winner_idx: 0,
-        }
-    }
-}
-
 pub(crate) struct BingoBoard {
     // Each time a number is found, replace it with None
     grid: Vec<Vec<Option<usize>>>,
-    round_nb : usize,
-    score : Option<usize>
-
+    round_nb: usize,
+    score: Option<usize>,
 }
 
 impl fmt::Debug for BingoBoard {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-
-        write!(f,"BingoBoard")?;
+        write!(f, "BingoBoard")?;
         for line in self.grid.iter() {
-
-            let line_str = line.iter().map(|v|v.map_or("  ".to_string(), |v| v.to_string())).fold("\n".to_string(), |acc, v| { let mut acc = acc.clone(); acc.push(' '); acc.push_str(&v) ;acc});
+            let line_str = line
+                .iter()
+                .map(|v| v.map_or("  ".to_string(), |v| v.to_string()))
+                .fold("\n".to_string(), |mut acc, v| {
+                    acc.push(' ');
+                    acc.push_str(&v);
+                    acc
+                });
             write!(f, "\n    {}", line_str)?;
         }
-        write!(f, "\n round {} : score {}", self.round_nb, self.score.map_or("".to_string(), |v|v.to_string()))?;
+        write!(
+            f,
+            "\n round {} : score {}",
+            self.round_nb,
+            self.score.map_or("".to_string(), |v| v.to_string())
+        )?;
 
-        write!(f,"\n.")
-
+        write!(f, "\n.")
     }
 }
 
@@ -49,35 +48,34 @@ impl BingoBoard {
                     .map(|val| val.parse::<usize>().ok())
                     .collect_vec()
             })
-            .filter(|v|!v.is_empty())
+            .filter(|v| !v.is_empty())
             .collect_vec();
         let lenght = grid[0].len();
-        if grid.iter().find(|l| l.len() != lenght).is_some() {
+        if grid.iter().any(|l| l.len() != lenght) {
             panic!("grid from {:?} is not regular : {:?}", lines, grid);
         }
-        let result= BingoBoard { grid, round_nb:0, score: None };
 
-        // dbg!(lines, &result);
-        result
+        BingoBoard {
+            grid,
+            round_nb: 0,
+            score: None,
+        }
     }
 
     pub(crate) fn compute_score(&mut self, last_played: usize) -> Option<usize> {
-        let finished_line = self
-            .grid
-            .iter()
-            .find(|l| l.iter().all(|v| v.is_none()));
+        let finished_line = self.grid.iter().find(|l| l.iter().all(|v| v.is_none()));
 
         if finished_line.is_some() {
             // dbg!(&finished_line);
         }
 
-
-        let mut finished_column = finished_line.is_some() || {
+        let finished_column = finished_line.is_some() || {
             let line_length = self.grid[0].len();
             let columns = (0..line_length)
-                .map(|c_idx| self.grid.iter().map(|l| l[c_idx]).collect_vec()).collect_vec();
+                .map(|c_idx| self.grid.iter().map(|l| l[c_idx]).collect_vec())
+                .collect_vec();
 
-            let finished = columns.iter().find(|c| c.iter().all(|v|v.is_none()));
+            let finished = columns.iter().find(|c| c.iter().all(|v| v.is_none()));
             if finished.is_some() {
                 // dbg!(&finished);
                 // dbg!(&self);
@@ -124,10 +122,10 @@ struct BingoGame {
 
 impl BingoGame {
     pub fn new(bingo: &str) -> BingoGame {
-        let mut lines = bingo.lines().collect_vec();
+        let lines = bingo.lines().collect_vec();
         // dbg!(&lines[0]);
         let drawns = lines[0]
-            .split(",")
+            .split(',')
             .filter_map(|val| val.parse::<usize>().ok())
             .collect_vec();
 
@@ -141,23 +139,21 @@ impl BingoGame {
             if line.is_empty() {
                 last_empty_line = Some(idx);
                 if let Some(start_idx) = last_non_empty_line {
-                    boards.push(BingoBoard::new(&lines[start_idx..idx+1 ])); // tricky :because of init offset
+                    boards.push(BingoBoard::new(&lines[start_idx..idx + 1])); // tricky :because of init offset
                     last_non_empty_line = None;
                 }
-            } else {
-                if last_non_empty_line.is_none() {
-                    last_non_empty_line = Some(idx + 1); // FIXME : tricky
-                }
+            } else if last_non_empty_line.is_none() {
+                last_non_empty_line = Some(idx + 1); // FIXME : tricky
             }
         }
         if last_non_empty_line.unwrap() > last_empty_line.unwrap() {
-            boards.push(BingoBoard::new(&lines[last_non_empty_line.unwrap() ..]));
+            boards.push(BingoBoard::new(&lines[last_non_empty_line.unwrap()..]));
         }
         BingoGame { drawns, boards }
     }
 }
 
-pub fn play_bingo(bingo: &str) -> (BingoResult,BingoResult) {
+pub fn play_bingo(bingo: &str) -> (BingoResult, BingoResult) {
     let mut bg = BingoGame::new(bingo);
     // dbg!("drawns : {}, boards :{}", &bg.drawns ,bg.boards.len());
     let mut first_winner = None;
@@ -168,7 +164,7 @@ pub fn play_bingo(bingo: &str) -> (BingoResult,BingoResult) {
             .boards
             .iter_mut()
             .enumerate()
-            .map(|(idx, board)| {
+            .map(|(_idx, board)| {
                 // println!("play( {}, {})", idx, drawn);
                 board.play(drawn);
                 (board.round_nb, board.score)
@@ -177,16 +173,16 @@ pub fn play_bingo(bingo: &str) -> (BingoResult,BingoResult) {
         let best = ranked_scores
             .iter()
             .enumerate()
-            .filter_map(|(idx, (rank,score))| score.map(|s| (idx, *rank, s)))
-            .max_by(|(idx1, rank1,score1), (idx2, rank2, score2)| rank1.cmp(rank2));
-        if let Some((winner_idx, rank, winner_score)) = best {
+            .filter_map(|(idx, (rank, score))| score.map(|s| (idx, *rank, s)))
+            .max_by(|(_idx, rank1, _score), (_, rank2, _)| rank1.cmp(rank2));
+        if let Some((winner_idx, _rank, winner_score)) = best {
             dbg!(drawn, winner_idx);
             last_winner = Some(BingoResult {
                 winner_idx,
                 winner_score,
             });
-            if first_winner.is_none(){
-                first_winner=Some(BingoResult {
+            if first_winner.is_none() {
+                first_winner = Some(BingoResult {
                     winner_idx,
                     winner_score,
                 });
@@ -194,10 +190,10 @@ pub fn play_bingo(bingo: &str) -> (BingoResult,BingoResult) {
         }
     }
 
-    (first_winner.unwrap(),last_winner.unwrap())
+    (first_winner.unwrap(), last_winner.unwrap())
 }
 
-pub fn display_bingo(){
+pub fn display_bingo() {
     let bingo = include_str!("day_4_bingo.txt");
     let result = play_bingo(bingo);
     println!("result {:?}", result);
@@ -208,7 +204,6 @@ mod tests {
 
     #[test]
     fn aoc_example_works() {
-
         let bingo = "7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 
 22 13 17 11  0
