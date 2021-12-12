@@ -27,13 +27,13 @@ pub(crate) struct BingoBoard {
 impl fmt::Debug for BingoBoard {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 
-        write!(f,"BingoBoard");
+        write!(f,"BingoBoard")?;
         for line in self.grid.iter() {
 
             let line_str = line.iter().map(|v|v.map_or("  ".to_string(), |v| v.to_string())).fold("\n".to_string(), |acc, v| { let mut acc = acc.clone(); acc.push(' '); acc.push_str(&v) ;acc});
-            write!(f, "\n    {}", line_str);
+            write!(f, "\n    {}", line_str)?;
         }
-        write!(f, "\n round {} : score {}", self.round_nb, self.score.map_or("".to_string(), |v|v.to_string()));
+        write!(f, "\n round {} : score {}", self.round_nb, self.score.map_or("".to_string(), |v|v.to_string()))?;
 
         write!(f,"\n.")
 

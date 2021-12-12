@@ -5,6 +5,7 @@ mod day4;
 mod day5;
 mod day6;
 mod day7;
+mod day8;
 
 
 fn main() {
@@ -15,4 +16,5 @@ fn main() {
     day5::print_hydrothermals();
     day6::print_lanternfishes_counts();
     day7::print_crab_alignment();
+    day8::display_digits();
 }
