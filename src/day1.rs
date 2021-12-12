@@ -25,7 +25,7 @@ fn count_summed_depth_incrs(report: &'static str) -> usize {
 }
 
 pub fn print_depth_incrs() {
-    let report = include_str!("day1_sonar_depths.txt");
+    let report = include_str!("../ressources/day1_sonar_depths.txt");
     println!("number of depth increases : {}", count_depth_incrs(report));
     println!(
         "number of summed depth increases : {}",

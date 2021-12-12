@@ -194,7 +194,7 @@ pub fn play_bingo(bingo: &str) -> (BingoResult, BingoResult) {
 }
 
 pub fn display_bingo() {
-    let bingo = include_str!("day_4_bingo.txt");
+    let bingo = include_str!("../ressources/day4_bingo.txt");
     let result = play_bingo(bingo);
     println!("result {:?}", result);
 }

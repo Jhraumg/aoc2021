@@ -105,7 +105,7 @@ impl Diagnosis {
 }
 
 pub fn print_power() {
-    let report = include_str!("day3_diagnosis.txt");
+    let report = include_str!("../ressources/day3_diagnosis.txt");
     let diag = Diagnosis::new(report);
     println!("diagnosis : {:?}", diag);
     println!("power : {:?}", diag.gamma * diag.epsilon);

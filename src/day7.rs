@@ -19,7 +19,7 @@ fn compute_alignment_necessary_fuel(pos: &str, fuel_law: impl Fn(usize) -> usize
 }
 
 pub fn print_crab_alignment() {
-    let crabs_pos = include_str!("day7_crabs_pos.txt");
+    let crabs_pos = include_str!("../ressources/day7_crabs_pos.txt");
     println!(
         "fuel necessary to align  crabs (simple law) {}",
         compute_alignment_necessary_fuel(crabs_pos, |d| d)
