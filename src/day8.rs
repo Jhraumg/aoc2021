@@ -155,7 +155,6 @@ impl DisplaysSource {
             }
         }
 
-
         // This will stores all possible associations
         // let's init it from the digit each wire can map
         let mut wires_to_wire: HashMap<Wire, HashSet<Wire>> = Wire::iter()
@@ -196,7 +195,7 @@ impl DisplaysSource {
                 for (wire, candidates) in wires_to_wire.iter_mut() {
                     let len = candidates.len();
                     // (sources.contains && actual_wires.contains) or (!sources.contains && !actual_wires.contains)
-                    candidates.retain(|c|! (sources.contains(wire)^actual_wires.contains(c)));
+                    candidates.retain(|c| !(sources.contains(wire) ^ actual_wires.contains(c)));
                     if len > candidates.len() {
                         eprintln!(
                             "removed {} wires from {:?} candidates",
@@ -214,7 +213,7 @@ impl DisplaysSource {
                 .map(|(wire, translations)| (*wire, *translations.iter().next().unwrap()))
                 .collect();
             if resolved_wires.len() == wires_to_wire.len() {
-                eprintln!("solved at {} try",tr);
+                eprintln!("solved at {} try", tr);
                 break;
             }
             for (displayed, actual) in resolved_wires {

@@ -6,6 +6,7 @@ mod day5;
 mod day6;
 mod day7;
 mod day8;
+mod day9;
 
 fn main() {
     println!("****");
@@ -24,5 +25,7 @@ fn main() {
     day7::print_crab_alignment();
     println!("****");
     day8::display_digits();
+    println!("****");
+    day9::display_smoke_risks();
     println!("****");
 }
