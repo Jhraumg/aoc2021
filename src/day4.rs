@@ -176,7 +176,7 @@ pub fn play_bingo(bingo: &str) -> (BingoResult, BingoResult) {
             .filter_map(|(idx, (rank, score))| score.map(|s| (idx, *rank, s)))
             .max_by(|(_idx, rank1, _score), (_, rank2, _)| rank1.cmp(rank2));
         if let Some((winner_idx, _rank, winner_score)) = best {
-            dbg!(drawn, winner_idx);
+            // dbg!(drawn, winner_idx);
             last_winner = Some(BingoResult {
                 winner_idx,
                 winner_score,

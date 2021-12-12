@@ -27,14 +27,13 @@ impl Vent {
 
     // Could do try_new(&str) -> Option<Vent>
     pub fn new(line: &str) -> Self {
-        dbg!(line);
         if let Some((x1, y1, x2, y2)) = line
             .split("->")
             .flat_map(|coords| coords.split(','))
             .map(|val| val.trim().parse::<usize>().unwrap())
             .collect_tuple()
         {
-            return dbg!(Vent { x1, y1, x2, y2 });
+            return Vent { x1, y1, x2, y2 };
         }
         panic!("could not parse a Vent from {}", line)
     }
@@ -79,7 +78,7 @@ impl Vent {
                 })
                 .collect();
         }
-        println!("unknown direction for {:?}", self);
+        eprintln!("unknown direction for {:?}", self);
         vec![]
     }
 }
