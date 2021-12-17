@@ -17,7 +17,7 @@ fn get_dim(map: &[Vec<usize>]) -> Point {
     (max_x, max_y)
 }
 
-type Point = (usize, usize);
+pub type Point = (usize, usize);
 
 fn get_neighbours_pos(
     pos: &Point,
@@ -44,7 +44,7 @@ fn get_neighbours_pos(
 }
 
 // thats'not what we're asked :-p
-fn get_neighbours_pos_diag(pos: &Point, dim: &Point) -> Vec<Point> {
+pub fn get_neighbours_pos_diag(pos: &Point, dim: &Point) -> Vec<Point> {
     get_neighbours_pos(pos, dim, |(x, y), (nx, ny)| nx != x || ny != y)
 }
 
@@ -113,7 +113,7 @@ fn get_bassin(low_point: &Point, dim: &Point, heights: &[Vec<usize>]) -> Vec<Poi
 fn multiply_bassins(heights: &[Vec<usize>]) -> usize {
     let dim = get_dim(heights);
     let low_points = get_low_points(heights);
-    let mut bassins_lengths = low_points
+    let bassins_lengths = low_points
         .iter()
         .map(|p| get_bassin(p, &dim, heights))
         .map(|b| b.len())

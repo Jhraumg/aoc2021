@@ -13,7 +13,7 @@ fn get_closing_char(start_char: char) -> char {
     }
 }
 
-fn get_closing_score_by_start_char(start:char ) -> usize {
+fn get_closing_score_by_start_char(start: char) -> usize {
     match start {
         '<' => 4,
         '[' => 2,
@@ -26,7 +26,7 @@ fn get_closing_score_by_start_char(start:char ) -> usize {
 #[derive(Debug)]
 enum ParsedSequence {
     Complete(&'static str),
-    Incomplete { start: char, score : usize },
+    Incomplete { start: char, score: usize },
 }
 
 use itertools::Itertools;
@@ -40,7 +40,7 @@ fn get_valid_subsequence(seq: &'static str) -> SyntaxResult {
     let start = seq.chars().next().unwrap();
     if seq.len() == 1 {
         // eprintln!("sequence {} is incomplete", seq);
-        return Ok(Incomplete{ start, score:0 });
+        return Ok(Incomplete { start, score: 0 });
     }
     let mut read_l = 1;
     match start {
@@ -55,9 +55,17 @@ fn get_valid_subsequence(seq: &'static str) -> SyntaxResult {
                 // maybe there is another subsequence
                 if get_starting_chars().contains(&seq[read_l..].chars().next().unwrap()) {
                     match get_valid_subsequence(&seq[read_l..])? {
-                        Complete(subs) =>{ read_l += subs.len();},
-                        Incomplete {start:sub_start, score } => {
-                            return Ok(Incomplete {start, score: score*5 + get_closing_score_by_start_char(sub_start)});
+                        Complete(subs) => {
+                            read_l += subs.len();
+                        }
+                        Incomplete {
+                            start: sub_start,
+                            score,
+                        } => {
+                            return Ok(Incomplete {
+                                start,
+                                score: score * 5 + get_closing_score_by_start_char(sub_start),
+                            });
                         }
                     }
 
@@ -73,12 +81,11 @@ fn get_valid_subsequence(seq: &'static str) -> SyntaxResult {
                 // );
                 return Err(bad_closing_char);
             }
-            Ok(Incomplete {start,score:0})
+            Ok(Incomplete { start, score: 0 })
         }
 
         _ => {
             panic!("BAD START char {}", start);
-            Err(start)
         }
     }
 }
@@ -86,14 +93,16 @@ fn get_valid_subsequence(seq: &'static str) -> SyntaxResult {
 fn check_line(line: &'static str) -> SyntaxResult {
     let mut read_chars = 0;
     while read_chars < line.len() {
-        match get_valid_subsequence(&line[read_chars..])?{
-            Incomplete {start,score} => {
-                let score =score*5 + get_closing_score_by_start_char(start);
-                let result =Incomplete {start:'§', score};
+        match get_valid_subsequence(&line[read_chars..])? {
+            Incomplete { start, score } => {
+                let score = score * 5 + get_closing_score_by_start_char(start);
+                let result = Incomplete { start: '§', score };
                 // eprintln!("{} Incomplete : {}", line, score);
                 return Ok(result);
             }
-            Complete(sub) => {read_chars += sub.len();},
+            Complete(sub) => {
+                read_chars += sub.len();
+            }
         }
     }
     Ok(Complete(line))
@@ -114,16 +123,16 @@ fn illegal_score(input: &'static str) -> usize {
 }
 
 fn middle_completion_score(input: &'static str) -> usize {
-    let mut incomplete_scores:Vec<_> =input
+    let incomplete_scores: Vec<_> = input
         .lines()
         .filter_map(|line| check_line(line).ok())
-        .filter_map (|seq| match seq {
-            Incomplete{score,..} => Some(score),
+        .filter_map(|seq| match seq {
+            Incomplete { score, .. } => Some(score),
             _ => None,
         })
         .sorted()
         .collect();
-    let middle = (incomplete_scores.len() -1)/2;
+    let middle = (incomplete_scores.len() - 1) / 2;
     incomplete_scores[middle]
 }
 
@@ -131,8 +140,10 @@ pub fn print_syntax_check() {
     let input = include_str!("../ressources/day10_navigation_syntax.txt");
 
     println!("illegal score : {}", illegal_score(input));
-    println!("middle incomplete score : {}", middle_completion_score(input));
-
+    println!(
+        "middle incomplete score : {}",
+        middle_completion_score(input)
+    );
 }
 
 #[cfg(test)]
