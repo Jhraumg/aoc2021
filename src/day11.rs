@@ -16,9 +16,10 @@ fn count_number_of_flashes_for_step(energies: &mut [Vec<usize>]) -> (usize, bool
     let dim = (energies.len(), energies.get(0).unwrap().len());
     let mut flashed: HashSet<Point> = HashSet::with_capacity(dim.0 * dim.1);
 
-    energies.iter_mut()
-        .flat_map(|l|l.iter_mut())
-        .for_each(|e|*e+=1);
+    energies
+        .iter_mut()
+        .flat_map(|l| l.iter_mut())
+        .for_each(|e| *e += 1);
 
     loop {
         let next_flashes: Vec<Point> = energies
