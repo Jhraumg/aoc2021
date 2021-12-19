@@ -1,63 +1,79 @@
 use itertools::Itertools;
-use std::collections::{HashMap, HashSet};
-use std::iter::once;
-use std::mem::take;
 
 struct Polymer {
-    sequence: Vec<u8>,
+    // store the number of _sequence for x+256 y
+    pair_counts: Vec<usize>,
     chemistry: Vec<Option<u8>>,
+    // should be handy to avoid counting it once more
+    last_component: u8,
 }
 
 impl Polymer {
+    fn get_index(c1: u8, c2: u8) -> usize {
+        (c1 as usize) + 256 * (c2 as usize)
+    }
+
     pub fn parse(input: &str) -> Self {
         let mut lines = input.lines();
 
-        let sequence: Vec<_> = lines.next().unwrap().bytes().collect();
-        let mut chemistry= vec![None;256*256];
-        for ((c1,c2),new) in lines.filter_map(|l| {
-                // let's try without collect_tuple
-                let mut vals = l.split(" -> ");
-                let mut pair = vals.next()?.bytes();
-                let mut new = vals.next()?.bytes().next()?;
-                Some(((pair.next()?, pair.next()?), new))
-            }){
-            chemistry[c1 as usize+256*c2 as usize]=Some(new);
+        let bytes: Vec<_> = lines.next().unwrap().bytes().collect();
+        let mut pair_counts = vec![0usize; 256 * 256];
+        for (c1, c2) in bytes.iter().tuple_windows() {
+            pair_counts[Self::get_index(*c1, *c2)] += 1;
+        }
+
+        let last_component = bytes[bytes.len() - 1];
+
+        let mut chemistry = vec![None; 256 * 256];
+        for ((c1, c2), new) in lines.filter_map(|l| {
+            // let's try without collect_tuple
+            let mut vals = l.split(" -> ");
+            let mut pair = vals.next()?.bytes();
+            let new = vals.next()?.bytes().next()?;
+            Some(((pair.next()?, pair.next()?), new))
+        }) {
+            chemistry[Self::get_index(c1, c2)] = Some(new);
         }
 
         Self {
-            sequence,
+            pair_counts,
             chemistry,
+            last_component,
         }
-    }
-
-    fn get_new_component(&self, c1 :u8, c2:u8) -> Option<u8> {
-        self.chemistry[c1 as usize+256*c2 as usize]
     }
 
     pub fn grow(&mut self, steps: usize) {
         for _ in 0..steps {
-            let mut new :Vec<u8> = vec![' ' as u8;2*self.sequence.len()];
-            let mut c1 =self.sequence[0];
-            let mut chars = self.sequence.iter();
-            chars.next(); // TODO : avoid
-            for (i,c) in chars.enumerate() {
-                new[2*i]=c1;
-                new[2*i+1]=self.get_new_component(c1,*c).unwrap_or(' ' as u8);
-                c1=*c;
+            let mut new_assoc = vec![0usize; 256 * 256];
+            for (i, count) in self.pair_counts.iter_mut().enumerate() {
+                if *count > 0 {
+                    if let Some(new_c) = self.chemistry[i] {
+                        let c1 = (i % 256) as u8;
+                        let c2 = (i >> 8) as u8;
+                        new_assoc[Self::get_index(c1, new_c)] += *count;
+                        new_assoc[Self::get_index(new_c, c2)] += *count;
+                        *count = 0; // these pairs have been split
+                    }
+                }
             }
-            new[2*self.sequence.len()-1]=self.sequence[self.sequence.len()-1];
 
-            self.sequence = new.into_iter().filter(|c|*c != ' ' as u8).collect();
+            for (j, count) in self.pair_counts.iter_mut().enumerate() {
+                if new_assoc[j] != 0 {
+                    *count += new_assoc[j];
+                }
+            }
         }
     }
 
-
     pub fn decompose_and_sort_quantities(&self) -> Vec<usize> {
-        let mut quantities= [0usize;256];
+        let mut quantities = [0usize; 256];
 
-        for c in &self.sequence {
-            quantities[*c as usize]+=1;
+        for (i, count) in self.pair_counts.iter().enumerate() {
+            if *count > 0 {
+                quantities[i % 256] += *count;
+            }
         }
+        quantities[self.last_component as usize] += 1;
 
         quantities
             .into_iter()
@@ -108,13 +124,16 @@ CC -> N
 CN -> C";
 
         let mut polymer = Polymer::parse(input);
-        println!("polymer : {} elts", polymer.sequence.len());
+        let elt_counts = polymer.decompose_and_sort_quantities();
+        assert_eq!(1, elt_counts[0] - elt_counts[elt_counts.len() - 1]);
         polymer.grow(10);
-        println!("polymer : {} elts", polymer.sequence.len());
         let elt_counts = polymer.decompose_and_sort_quantities();
         assert_eq!(1588, elt_counts[0] - elt_counts[elt_counts.len() - 1]);
-        // polymer.grow(30);
-        // let elt_counts = polymer.decompose_and_sort_quantities();
-        // assert_eq!(2188189693529,elt_counts[0] - elt_counts[elt_counts.len()-1])
+        polymer.grow(30);
+        let elt_counts = polymer.decompose_and_sort_quantities();
+        assert_eq!(
+            2188189693529,
+            elt_counts[0] - elt_counts[elt_counts.len() - 1]
+        )
     }
 }
