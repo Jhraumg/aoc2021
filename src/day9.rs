@@ -86,12 +86,6 @@ fn get_flowing_points(point: &Point, dim: &Point, heights: &[Vec<usize>]) -> Vec
         .collect()
 }
 
-fn display_bassin(bassin: &[Point], heights: &[Vec<usize>]) {
-    eprintln!("bassin {}", bassin.len());
-    for (x, y) in bassin {
-        eprintln!("  ({},{}) : {}", x, y, heights[*x][*y]);
-    }
-}
 fn get_bassin(low_point: &Point, dim: &Point, heights: &[Vec<usize>]) -> Vec<Point> {
     let mut bassin: Vec<Point> = vec![];
 
@@ -106,7 +100,6 @@ fn get_bassin(low_point: &Point, dim: &Point, heights: &[Vec<usize>]) -> Vec<Poi
         bassin.append(&mut new_points);
         new_points.append(&mut new_new_points);
     }
-    display_bassin(&bassin, heights);
     bassin
 }
 

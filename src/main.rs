@@ -2,6 +2,7 @@ mod day1;
 mod day10;
 mod day11;
 mod day12;
+mod day13;
 mod day2;
 mod day3;
 mod day4;
@@ -36,4 +37,6 @@ fn main() {
     day11::display_octopuses_flash_count();
     println!("****");
     day12::display_pathes();
+    println!("****");
+    day13::print_origami_details();
 }

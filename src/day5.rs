@@ -78,7 +78,7 @@ impl Vent {
                 })
                 .collect();
         }
-        eprintln!("unknown direction for {:?}", self);
+        // eprintln!("unknown direction for {:?}", self);
         vec![]
     }
 }

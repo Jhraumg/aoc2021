@@ -173,7 +173,7 @@ impl DisplaysSource {
         for j in 0..10 {
             for (wire, candidates) in wires_to_wire.iter_mut() {
                 if !wire_to_digits.get(wire).unwrap().contains(&j) {
-                    eprintln!("removing {} digits from {:?} wire", j, wire);
+                    // eprintln!("removing {} digits from {:?} wire", j, wire);
                     for candidate in get_wires(j) {
                         candidates.take(&candidate);
                     }
@@ -181,7 +181,7 @@ impl DisplaysSource {
             }
         }
 
-        for tr in 0..10 {
+        for _ in 0..10 {
             // max 10 iterations since there are 10 unknown
             // let's work with digits whose wire set is fully known
 
@@ -197,11 +197,11 @@ impl DisplaysSource {
                     // (sources.contains && actual_wires.contains) or (!sources.contains && !actual_wires.contains)
                     candidates.retain(|c| !(sources.contains(wire) ^ actual_wires.contains(c)));
                     if len > candidates.len() {
-                        eprintln!(
-                            "removed {} wires from {:?} candidates",
-                            len - candidates.len(),
-                            wire
-                        );
+                        // eprintln!(
+                        //     "removed {} wires from {:?} candidates",
+                        //     len - candidates.len(),
+                        //     wire
+                        // );
                     }
                 }
             }
@@ -213,20 +213,20 @@ impl DisplaysSource {
                 .map(|(wire, translations)| (*wire, *translations.iter().next().unwrap()))
                 .collect();
             if resolved_wires.len() == wires_to_wire.len() {
-                eprintln!("solved at {} try", tr);
+                // eprintln!("solved at {} try", tr);
                 break;
             }
             for (displayed, actual) in resolved_wires {
                 // direct Mapping
                 for (wire, candidates) in wires_to_wire.iter_mut() {
                     if displayed != *wire && candidates.take(&actual).is_some() {
-                        eprintln!("removing {:?} from {:?} candidates", &actual, wire);
+                        // eprintln!("removing {:?} from {:?} candidates", &actual, wire);
                     }
                 }
                 // Digit mapping :  todo build from digit_to_sisplay_index ?
                 for (digit, sources) in digit_to_source_wires.iter_mut() {
                     if !get_wires(*digit).contains(&actual) && sources.take(&displayed).is_some() {
-                        eprintln!("removing {:?} from {:?} sources", &displayed, digit);
+                        // eprintln!("removing {:?} from {:?} sources", &displayed, digit);
                     }
                 }
                 for (digit, display_indexes) in digit_to_displayed_index.iter_mut() {
@@ -236,11 +236,11 @@ impl DisplaysSource {
                         display_indexes
                             .retain(|idx| !self.digits_segments[*idx].contains(&displayed));
                         if len > display_indexes.len() {
-                            eprintln!(
-                                "{:?} possible index removed from {:?}",
-                                len - display_indexes.len(),
-                                digit
-                            );
+                            // eprintln!(
+                            //     "{:?} possible index removed from {:?}",
+                            //     len - display_indexes.len(),
+                            //     digit
+                            // );
                         }
                     }
                 }
@@ -256,11 +256,11 @@ impl DisplaysSource {
                     let len = wires.len();
                     wires.retain(|f| all_possible_index.contains(&f));
                     if len > wires.len() {
-                        eprintln!(
-                            "{:?} possible wires removed from {:?}",
-                            len - wires.len(),
-                            digit
-                        );
+                        // eprintln!(
+                        //     "{:?} possible wires removed from {:?}",
+                        //     len - wires.len(),
+                        //     digit
+                        // );
                     }
 
                     let acceptable_wires = get_wires(*digit);
