@@ -1,5 +1,5 @@
 use crate::day9::{get_neighbours_pos_horz_vert, Point};
-use std::collections::{HashSet};
+use itertools::Itertools;
 
 fn get_lowest_risk(input: &str, map_factor: usize) -> usize {
     let base_risks: Vec<Vec<usize>> = input
@@ -29,26 +29,17 @@ fn get_lowest_risk(input: &str, map_factor: usize) -> usize {
 
     best_risks[0][0] = Some(0);
 
-    let mut current_points: HashSet<_> = vec![(0, 0)].into_iter().collect();
+    let mut current_points: Vec<_> = vec![(0, 0)];
     loop {
         let new_risked_points: Vec<(Point, usize)> = current_points
-            .iter()
-            .flat_map(|cur| {
-                let current_risk = best_risks[cur.0][cur.1].unwrap();
-                let neighbours: Vec<_> = get_neighbours_pos_horz_vert(cur, &dim)
+            .into_iter()
+            .map(|p| (p, best_risks[p.0][p.1].unwrap()))
+            .flat_map(|(cur, current_risk)| {
+                get_neighbours_pos_horz_vert(&cur, &dim)
                     .into_iter()
-                    .filter_map(|n| {
-                        let new_risk = current_risk + risks[n.0][n.1];
-                        let previous_best_risk = best_risks[n.0][n.1].unwrap_or(usize::MAX);
-
-                        if new_risk < previous_best_risk {
-                            Some((n, new_risk))
-                        } else {
-                            None
-                        }
-                    })
-                    .collect(); //TODO : see how to avoid this
-                neighbours.into_iter()
+                    .map(|p| (p, current_risk + risks[p.0][p.1]))
+                    .collect_vec()
+                    .into_iter()
             })
             .collect();
 
@@ -57,10 +48,18 @@ fn get_lowest_risk(input: &str, map_factor: usize) -> usize {
                 best_risks[p.0][p.1] = Some(*r);
             }
         }
-        if new_risked_points.is_empty() {
+        current_points = new_risked_points
+            .into_iter()
+            .filter_map(|(p, r)| match r {
+                r if r == best_risks[p.0][p.1].unwrap() => Some(p),
+                _ => None,
+            })
+            .unique()
+            .collect();
+
+        if current_points.is_empty() {
             break;
         }
-        current_points = new_risked_points.into_iter().map(|(p, _)| p).collect();
     }
 
     best_risks[dim.0 - 1][dim.1 - 1].unwrap()
