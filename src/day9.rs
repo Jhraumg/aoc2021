@@ -48,7 +48,7 @@ pub fn get_neighbours_pos_diag(pos: &Point, dim: &Point) -> Vec<Point> {
     get_neighbours_pos(pos, dim, |(x, y), (nx, ny)| nx != x || ny != y)
 }
 
-fn get_neighbours_pos_horz_vert(pos: &Point, dim: &Point) -> Vec<Point> {
+pub fn get_neighbours_pos_horz_vert(pos: &Point, dim: &Point) -> Vec<Point> {
     get_neighbours_pos(pos, dim, |(x, y), (nx, ny)| (nx != x) ^ (ny != y))
 }
 

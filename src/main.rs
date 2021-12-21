@@ -4,6 +4,7 @@ mod day11;
 mod day12;
 mod day13;
 mod day14;
+mod day15;
 mod day2;
 mod day3;
 mod day4;
@@ -42,4 +43,6 @@ fn main() {
     day13::print_origami_details();
     println!("****");
     day14::display_polymer();
+    println!("****");
+    day15::display_safest_path();
 }
