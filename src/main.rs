@@ -12,6 +12,7 @@ mod day19;
 mod day2;
 mod day20;
 mod day21;
+mod day22;
 mod day3;
 mod day4;
 mod day5;
@@ -63,4 +64,6 @@ fn main() {
     day20::display_enhanced_img();
     println!("****");
     day21::display_dirac_dice_play();
+    println!("****");
+    day22::display_reactor_reboot();
 }

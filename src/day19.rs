@@ -1,10 +1,10 @@
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
-struct ThreeDPoints {
-    x: isize,
-    y: isize,
-    z: isize,
+pub struct ThreeDPoint {
+    pub x: isize,
+    pub y: isize,
+    pub z: isize,
 }
-impl FromStr for ThreeDPoints {
+impl FromStr for ThreeDPoint {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -20,16 +20,16 @@ impl FromStr for ThreeDPoints {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Vect {
+pub struct Vect {
     x: isize,
     y: isize,
     z: isize,
 }
 
-impl std::ops::Sub<ThreeDPoints> for ThreeDPoints {
+impl std::ops::Sub<ThreeDPoint> for ThreeDPoint {
     type Output = Vect;
 
-    fn sub(self, rhs: ThreeDPoints) -> Self::Output {
+    fn sub(self, rhs: ThreeDPoint) -> Self::Output {
         Self::Output {
             x: self.x - rhs.x,
             y: self.y - rhs.y,
@@ -39,8 +39,8 @@ impl std::ops::Sub<ThreeDPoints> for ThreeDPoints {
 }
 
 // Fixme : define Vector, etc...
-impl std::ops::Add<Vect> for ThreeDPoints {
-    type Output = ThreeDPoints;
+impl std::ops::Add<Vect> for ThreeDPoint {
+    type Output = ThreeDPoint;
     fn add(self, rhs: Vect) -> Self::Output {
         Self::Output {
             x: self.x + rhs.x,
@@ -72,7 +72,7 @@ use std::collections::HashSet;
 use std::str::FromStr;
 use Direction::{RX, RY, RZ, X, Y, Z};
 impl Direction {
-    fn get_unary_coordinate(&self, point: &ThreeDPoints) -> isize {
+    fn get_unary_coordinate(&self, point: &ThreeDPoint) -> isize {
         match self {
             X => point.x,
             Y => point.y,
@@ -158,9 +158,9 @@ impl ScanDir {
         }
     }
 
-    fn get_coordinates(&self, point: &ThreeDPoints) -> ThreeDPoints {
+    fn get_coordinates(&self, point: &ThreeDPoint) -> ThreeDPoint {
         let (ax, ay, az) = self.get_inverse_axes().unwrap();
-        ThreeDPoints {
+        ThreeDPoint {
             x: ax.get_unary_coordinate(point),
             y: ay.get_unary_coordinate(point),
             z: az.get_unary_coordinate(point),
@@ -170,11 +170,11 @@ impl ScanDir {
 
 #[derive(Debug)]
 struct Scanner {
-    points: Vec<ThreeDPoints>,
+    points: Vec<ThreeDPoint>,
 }
 impl Scanner {
     fn get_matching_scandir(&self, rhs: &Scanner) -> Option<(ScanDir, Vect)> {
-        let my_points: HashSet<ThreeDPoints> = self.points.iter().copied().collect();
+        let my_points: HashSet<ThreeDPoint> = self.points.iter().copied().collect();
         for sd in ScanDir::get_all_scandirs() {
             // let's rotate 2n scanner
             let rhs_points: Vec<_> = rhs.points.iter().map(|p| sd.get_coordinates(p)).collect();
@@ -215,19 +215,19 @@ fn read_scanners(input: &str) -> Vec<Scanner> {
             Scanner {
                 points: data
                     .take_while(|l| !l.starts_with("--- scanner "))
-                    .filter_map(|l| l.parse::<ThreeDPoints>().ok())
+                    .filter_map(|l| l.parse::<ThreeDPoint>().ok())
                     .collect(),
             }
         })
         .collect()
 }
 
-fn tune_scanners(scanners: &[Scanner]) -> (Vec<Scanner>, Vec<ThreeDPoints>) {
+fn tune_scanners(scanners: &[Scanner]) -> (Vec<Scanner>, Vec<ThreeDPoint>) {
     let mut converted_idx = vec![0];
     let mut converted: Vec<Scanner> = vec![Scanner {
         points: scanners[0].points.clone(),
     }];
-    let mut scanners_coordinates = vec![ThreeDPoints { x: 0, y: 0, z: 0 }];
+    let mut scanners_coordinates = vec![ThreeDPoint { x: 0, y: 0, z: 0 }];
 
     let mut already_checked_against = 0;
     for _ in 0..scanners.len() {
@@ -244,7 +244,7 @@ fn tune_scanners(scanners: &[Scanner]) -> (Vec<Scanner>, Vec<ThreeDPoints>) {
                 }) {
                     // eprintln!("#{:?}", sd);
                     converted_idx.push(j);
-                    scanners_coordinates.push(ThreeDPoints { x: 0, y: 0, z: 0 } + trans);
+                    scanners_coordinates.push(ThreeDPoint { x: 0, y: 0, z: 0 } + trans);
                     converted.push(Scanner {
                         points: scanners[j]
                             .points
@@ -268,7 +268,7 @@ fn tune_scanners(scanners: &[Scanner]) -> (Vec<Scanner>, Vec<ThreeDPoints>) {
     (converted, scanners_coordinates)
 }
 
-fn max_manhattan_distance(scan_coords: &[ThreeDPoints]) -> usize {
+fn max_manhattan_distance(scan_coords: &[ThreeDPoint]) -> usize {
     scan_coords
         .iter()
         .flat_map(|p1| {
@@ -448,11 +448,11 @@ mod tests {
     #[test]
     fn scandirsrs_can_be_rotated() {
         let scanners = read_scanners(get_input());
-        let refp = ThreeDPoints { x: 1, y: 2, z: 3 };
+        let refp = ThreeDPoint { x: 1, y: 2, z: 3 };
 
         assert_eq!(
             refp,
-            ScanDir { facing: Y, up: RX }.get_coordinates(&ThreeDPoints { x: 2, y: -3, z: -1 })
+            ScanDir { facing: Y, up: RX }.get_coordinates(&ThreeDPoint { x: 2, y: -3, z: -1 })
         );
     }
 
