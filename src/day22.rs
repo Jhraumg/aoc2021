@@ -2,7 +2,7 @@ use crate::day19::ThreeDPoint;
 use anyhow::{anyhow, Error};
 use itertools::Itertools;
 use std::cmp::{max, min};
-use std::ops::{Range};
+use std::ops::Range;
 use std::str::FromStr;
 
 struct Reactor<const SIZE: usize> {
@@ -73,7 +73,7 @@ fn get_actual_range(proposed: &(isize, isize), possible: &(isize, isize)) -> Ran
     }
 }
 
-#[derive(Debug, Clone,Default)]
+#[derive(Debug, Clone, Default)]
 struct Cuboid {
     xrange: (isize, isize),
     yrange: (isize, isize),
@@ -222,15 +222,14 @@ fn reboot_unsized_reactor(input: &str) -> usize {
         // * extra OFF commands are added for each intersection with already present ON commands
         // * extra ON commands are added for each intersection with already present OFF commands
         for c in &commands_counting_overlap {
-            if let Some(cubes) = c.cubes.intersect(&command.cubes){
+            if let Some(cubes) = c.cubes.intersect(&command.cubes) {
                 let status = match (command.status, c.status) {
                     (false, false) => true, // OFF ∩ OFF => ON
                     (false, true) => false, // OFF ∩ ON => OFF
                     (true, false) => true,  // ON ∩ OFF => ON
                     (true, true) => false,  // ON ∩ ON => OFF
                 };
-                extra_command.push(Command {status, cubes});
-
+                extra_command.push(Command { status, cubes });
             }
         }
         if command.status {
@@ -278,19 +277,6 @@ mod tests {
         assert_eq!(1, get_actual_range(&(50, 1000), &(-50, 50)).len());
 
         assert_eq!(0, get_actual_range(&(-100, -101), &(-100, 0)).len());
-    }
-
-    #[test]
-    fn cuboids_can_be_substracted() {
-        let c1 = Cuboid {
-            xrange: (-1, 1),
-            yrange: (-1, 1),
-            zrange: (-1, 1),
-        };
-        let result = c1 - Cuboid::default();
-        println!("resulting cuboids : {:?}", result);
-
-        assert_eq!(27, 1 + result.iter().map(|c| c.size()).sum::<usize>());
     }
 
     #[test]
