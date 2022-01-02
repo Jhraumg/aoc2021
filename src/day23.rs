@@ -2,9 +2,9 @@ use crate::day23::Amphipod::{Amber, Bronze, Copper, Desert};
 use anyhow::{anyhow, Error};
 use itertools::Itertools;
 use std::cmp::{max, min};
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
-use std::hash::{Hash};
+use std::hash::Hash;
 use std::str::FromStr;
 
 // Note : could directly model amphipods by their move cost
@@ -51,12 +51,12 @@ impl Display for Amphipod {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash)]
-struct Disposition {
+struct Disposition<const ROOM_LENGTH: usize> {
     hallway: [Option<Amphipod>; 11],
-    rooms: [[Option<Amphipod>; 2]; 4],
+    rooms: [[Option<Amphipod>; ROOM_LENGTH]; 4],
 }
 
-impl Disposition {
+impl<const ROOM_LENGTH: usize> Disposition<ROOM_LENGTH> {
     fn can_store_amphipod(i: usize) -> bool {
         ![2, 4, 6, 8].contains(&i) && i < 11
     }
@@ -71,9 +71,10 @@ impl Disposition {
     fn is_room_available(&self, room_idx: usize) -> bool {
         room_idx < 4
             && self.rooms[room_idx][0].is_none()
-            && self.rooms[room_idx][1]
-                .map(|a| room_idx == Self::get_suitable_room(a))
-                .unwrap_or(true)
+            && self.rooms[room_idx][1..ROOM_LENGTH].iter().all(|a| {
+                a.map(|a| room_idx == Self::get_suitable_room(a))
+                    .unwrap_or(true)
+            })
     }
 
     fn get_hallway_index_from_room(room_idx: usize) -> usize {
@@ -93,9 +94,21 @@ impl Disposition {
                 .unwrap_or(false)
         })
     }
+    fn get_first_available_place(&self, room_idx: usize) -> Option<usize> {
+        for (i, place) in self.rooms[room_idx].iter().enumerate().rev() {
+            match place {
+                Some(p) if Self::get_suitable_room(*p) != room_idx => {
+                    return None;
+                }
+                None => return Some(i),
+                _ => {}
+            }
+        }
+        None
+    }
 }
 
-impl Display for Disposition {
+impl<const ROOM_LENGTH: usize> Display for Disposition<ROOM_LENGTH> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str("#############\n")?;
         f.write_str("#")?;
@@ -108,7 +121,7 @@ impl Display for Disposition {
         }
         f.write_str("#\n")?;
 
-        for j in 0..2 {
+        for j in 0..ROOM_LENGTH {
             f.write_str("  #")?;
             for i in 0..4 {
                 if let Some(apod) = self.rooms[i][j] {
@@ -118,74 +131,116 @@ impl Display for Disposition {
                 }
                 f.write_str("#")?;
             }
-            f.write_str("\n")?;
+            f.write_str("  \n")?;
         }
-        f.write_str("")
+        f.write_str("  #########  ")
     }
 }
 
 #[derive(Clone)]
-struct Situation {
+struct Situation<const ROOM_LENGTH: usize> {
     score: usize,
-    disposition: Disposition,
+    disposition: Disposition<ROOM_LENGTH>,
 
-    /// debug only !
-    previous_disposition: Vec<Disposition>,
+    #[cfg(debug_assertions)]
+    previous_disposition: Vec<Disposition<ROOM_LENGTH>>,
 }
 
-impl Situation {
+impl<const ROOM_LENGTH: usize> Display for Situation<ROOM_LENGTH> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        #[cfg(debug_assertions)]
+        {
+            let descriptions: Vec<String> = self
+                .previous_disposition
+                .iter()
+                .map(|d| format!("{}", d))
+                .collect();
+
+            let flat_description = (0..descriptions[0].lines().count())
+                .map(|i| {
+                    // FIXME respliting each time is higly inneffective, but we"re not supposed to display these
+                    descriptions
+                        .iter()
+                        .map(|descr| descr.lines().nth(i).unwrap_or(""))
+                        .join("  ")
+                })
+                .join("\n");
+
+            f.write_str(&flat_description)?;
+        }
+
+        f.write_fmt(format_args!("\n{}\n", self.score))?;
+        self.disposition.fmt(f)
+    }
+}
+
+impl<const ROOM_LENGTH: usize> Situation<ROOM_LENGTH> {
+    fn new(score: usize, disposition: Disposition<ROOM_LENGTH>, source: &Self) -> Self {
+        #[cfg(debug_assertions)]
+        let mut previous_disposition = source.previous_disposition.clone();
+        #[cfg(debug_assertions)]
+        previous_disposition.push(source.disposition);
+
+        Self {
+            score,
+            disposition,
+            #[cfg(debug_assertions)]
+            previous_disposition,
+        }
+    }
+    fn can_move_out_of_room(&self, apod_loc: (usize, usize)) -> bool {
+        // current room is finished
+        if self.disposition.is_room_finished(apod_loc.0) {
+            return false;
+        }
+
+        // cannot pass through top Amphipods
+        if self.disposition.rooms[apod_loc.0][0..apod_loc.1]
+            .iter()
+            .any(Option::is_some)
+        {
+            return false;
+        }
+        // Amphipod is already in its room, which also contains only its siblings
+        if self.disposition.is_room_available(apod_loc.0) {
+            return false;
+        }
+        true
+    }
+
     /// provides a new Solution where an Amphipod have been moved from
     /// its start room to its target room (as deep as possible)
+    /// can be provided thanks to the 2 other moves, but this
+    /// reduce the number of possibilities
     fn room_to_room(&self, apod_loc: (usize, usize)) -> Option<Self> {
-        // current room
-        if self.disposition.is_room_finished(apod_loc.0) {
+        if !self.can_move_out_of_room(apod_loc) {
             return None;
         }
 
-        if apod_loc.1 == 1 {
-            if let Some(apod) = self.disposition.rooms[apod_loc.0][1] {
-                if apod_loc.0 == Disposition::get_suitable_room(apod) {
-                    // move is not necessary
-                    return None;
-                }
-            }
-            if self.disposition.rooms[apod_loc.0][0].is_some() {
-                return None;
-            }
-        }
-
         if let Some(apod) = self.disposition.rooms[apod_loc.0][apod_loc.1] {
-            let room_idx = Disposition::get_suitable_room(apod);
+            let room_idx = Disposition::<ROOM_LENGTH>::get_suitable_room(apod);
             let (hall_start, hall_end) = (
-                Disposition::get_hallway_index_from_room(apod_loc.0),
-                Disposition::get_hallway_index_from_room(room_idx),
+                Disposition::<ROOM_LENGTH>::get_hallway_index_from_room(apod_loc.0),
+                Disposition::<ROOM_LENGTH>::get_hallway_index_from_room(room_idx),
             );
             let hallway_travel = min(hall_start, hall_end)..max(hall_start, hall_end) + 1;
-            if self.disposition.is_room_available(room_idx)
-                && self.disposition.hallway[hallway_travel.clone()]
-                    .iter()
-                    .all(Option::is_none)
-            {
-                let target_room_pos: usize = if self.disposition.rooms[room_idx][1].is_none() {
-                    1
-                } else {
-                    0
-                }; // TODO change is_room_available to get_room_best_place(Apod)->Option<usize>
-                let score = self.score
-                    + apod.get_single_move_cost()
-                        * (apod_loc.1 + hallway_travel.len() + 1 + target_room_pos);
-                let hallway = self.disposition.hallway;
-                let mut rooms = self.disposition.rooms;
-                rooms[apod_loc.0][apod_loc.1] = None;
-                rooms[room_idx][target_room_pos] = Some(apod);
 
-                let mut previous_disposition = self.previous_disposition.clone();
-                previous_disposition.push(self.disposition);
-                return Some(Self {
-                    score,
-                    disposition: Disposition { hallway, rooms },
-                    previous_disposition,
-                });
+            if self.disposition.hallway[hallway_travel.clone()]
+                .iter()
+                .all(Option::is_none)
+            {
+                if let Some(target_room_pos) = self.disposition.get_first_available_place(room_idx)
+                {
+                    let score = self.score
+                        + apod.get_single_move_cost()
+                            * (apod_loc.1 + hallway_travel.len() + 1 + target_room_pos);
+                    let hallway = self.disposition.hallway;
+                    let mut rooms = self.disposition.rooms;
+                    rooms[apod_loc.0][apod_loc.1] = None;
+                    rooms[room_idx][target_room_pos] = Some(apod);
+
+                    return Some(Self::new(score, Disposition { hallway, rooms }, self));
+                }
             }
         }
         None
@@ -193,69 +248,47 @@ impl Situation {
 
     fn hallway_to_room(&self, apod_loc: usize) -> Option<Self> {
         if let Some(apod) = self.disposition.hallway[apod_loc] {
-            let room_idx = Disposition::get_suitable_room(apod);
-            let (hall_start, hall_end) =
-                (apod_loc, Disposition::get_hallway_index_from_room(room_idx));
+            let room_idx = Disposition::<ROOM_LENGTH>::get_suitable_room(apod);
+            let (hall_start, hall_end) = (
+                apod_loc,
+                Disposition::<ROOM_LENGTH>::get_hallway_index_from_room(room_idx),
+            );
             let hallway_travel = min(hall_start, hall_end)..max(hall_start, hall_end) + 1;
 
-            // we're already on the hallway
-            if self.disposition.is_room_available(room_idx)
-                && self.disposition.hallway[hallway_travel.clone()]
-                    .iter()
-                    .filter(|occupant| occupant.is_none())
-                    .count()
-                    == 1
+            // we're already on the hallway => that makes 1 place occupied
+            if self.disposition.hallway[hallway_travel.clone()]
+                .iter()
+                .filter(|occupant| !occupant.is_none())
+                .count()
+                == 1
             {
-                let target_room_pos: usize = if self.disposition.rooms[room_idx][1].is_none() {
-                    1
-                } else {
-                    0
-                };
-                let score = self.score
-                    + apod.get_single_move_cost() * (hallway_travel.len() + target_room_pos);
-                let mut hallway = self.disposition.hallway;
-                hallway[apod_loc] = None;
-                let mut rooms = self.disposition.rooms;
-                rooms[room_idx][target_room_pos] = Some(apod);
-                let mut previous_disposition = self.previous_disposition.clone();
-                previous_disposition.push(self.disposition);
-
-                return Some(Self {
-                    score,
-                    disposition: Disposition { hallway, rooms },
-                    previous_disposition,
-                });
+                if let Some(target_room_pos) = self.disposition.get_first_available_place(room_idx)
+                {
+                    let score = self.score
+                        + apod.get_single_move_cost() * (hallway_travel.len() + target_room_pos);
+                    let mut hallway = self.disposition.hallway;
+                    hallway[apod_loc] = None;
+                    let mut rooms = self.disposition.rooms;
+                    rooms[room_idx][target_room_pos] = Some(apod);
+                    return Some(Self::new(score, Disposition { hallway, rooms }, self));
+                }
             }
         }
         None
     }
 
-    // TODO : directly provide a Vec<Self> ?
     fn room_to_hallway(&self, apod_loc: (usize, usize), hall_target: usize) -> Option<Self> {
-        // current room
-        if self.disposition.is_room_finished(apod_loc.0) {
+        if !self.can_move_out_of_room(apod_loc) {
             return None;
         }
-        if apod_loc.1 == 1 {
-            if let Some(apod) = self.disposition.rooms[apod_loc.0][1] {
-                if apod_loc.0 == Disposition::get_suitable_room(apod) {
-                    // move is not necessary
-                    return None;
-                }
-            }
-            if self.disposition.rooms[apod_loc.0][0].is_some() {
-                // move is not possible
-                return None;
-            }
-        }
 
-        if !Disposition::can_store_amphipod(hall_target) {
+        if !Disposition::<ROOM_LENGTH>::can_store_amphipod(hall_target) {
             return None;
         }
 
         if let Some(apod) = self.disposition.rooms[apod_loc.0][apod_loc.1] {
             let (hall_start, hall_end) = (
-                Disposition::get_hallway_index_from_room(apod_loc.0),
+                Disposition::<ROOM_LENGTH>::get_hallway_index_from_room(apod_loc.0),
                 hall_target,
             );
             let hallway_travel = min(hall_start, hall_end)..max(hall_start, hall_end) + 1;
@@ -269,14 +302,8 @@ impl Situation {
                 hallway[hall_target] = Some(apod);
                 let mut rooms = self.disposition.rooms;
                 rooms[apod_loc.0][apod_loc.1] = None;
-                let mut previous_disposition = self.previous_disposition.clone();
-                previous_disposition.push(self.disposition);
 
-                return Some(Self {
-                    score,
-                    disposition: Disposition { hallway, rooms },
-                    previous_disposition,
-                });
+                return Some(Self::new(score, Disposition { hallway, rooms }, self));
             }
         }
 
@@ -284,7 +311,7 @@ impl Situation {
     }
 }
 
-impl FromStr for Disposition {
+impl<const ROOM_LENGTH: usize> FromStr for Disposition<ROOM_LENGTH> {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -298,12 +325,12 @@ impl FromStr for Disposition {
             })
             .collect();
 
-        if amphipods.len() != 2 {
+        if amphipods.len() != ROOM_LENGTH {
             return Err(anyhow!("amphipods rooms seem malformed"));
         }
 
         let hallway = [None; 11];
-        let mut rooms = [[None; 2]; 4];
+        let mut rooms = [[None; ROOM_LENGTH]; 4];
         for (i, l) in amphipods.into_iter().enumerate() {
             for (j, amphipod) in l.into_iter().enumerate() {
                 rooms[j][i] = Some(amphipod);
@@ -314,53 +341,55 @@ impl FromStr for Disposition {
     }
 }
 
-fn get_least_energy_to_organize_amphipods(start: &Disposition) -> usize {
+// TODO : just use dyn disptach inside Situation
+fn get_least_energy_to_organize_amphipods<const ROOM_LENGTH: usize>(
+    start: &Disposition<ROOM_LENGTH>,
+) -> usize {
+    let mut best_finished: Option<Situation<ROOM_LENGTH>> = None;
     let mut best_score: Option<usize> = None;
-    let mut best_situation: Option<Situation> = None;
 
-    // an HashSet would be enough !!
-    let mut best_situations: HashMap<Disposition, Situation> = HashMap::new();
+    let mut best_situations: HashMap<Disposition<ROOM_LENGTH>, Situation<ROOM_LENGTH>> =
+        HashMap::new();
 
     let mut current_situations = vec![Situation {
         score: 0,
         disposition: *start,
+        #[cfg(debug_assertions)]
         previous_disposition: vec![],
     }];
     while !current_situations.is_empty() {
-        let mut next_situations: HashMap<Disposition, Situation> =
+        let mut next_situations: HashMap<Disposition<ROOM_LENGTH>, Situation<ROOM_LENGTH>> =
             HashMap::with_capacity(current_situations.len());
+
         for situation in &current_situations {
-            let mut local_next_situations: Vec<Situation> =
+            let mut local_next_situations: Vec<Situation<ROOM_LENGTH>> =
                 Vec::with_capacity(current_situations.len());
+
+            // ROOM to ROOM
             local_next_situations.append(
                 &mut (0..situation.disposition.rooms.len())
-                    .flat_map(|i| (0..2).filter_map(move |j| situation.room_to_room((i, j))))
+                    .flat_map(|i| {
+                        (0..ROOM_LENGTH).filter_map(move |j| situation.room_to_room((i, j)))
+                    })
                     .collect(),
             );
 
+            // HALLWAY TO ROOM
             if local_next_situations.is_empty() {
                 local_next_situations.append(
-                    &mut situation
-                        .disposition
-                        .hallway
-                        .iter()
-                        .enumerate()
-                        .filter_map(|(i, _)| situation.hallway_to_room(i))
+                    &mut (0..11)
+                        .filter_map(move |i| situation.hallway_to_room(i))
                         .collect(),
                 );
             }
 
+            // ROOM_TO_HALLWAY
             if local_next_situations.is_empty() {
                 local_next_situations.append(
                     &mut (0..situation.disposition.rooms.len())
                         .flat_map(|i| {
-                            (0..2).flat_map(move |j| {
-                                situation
-                                    .disposition
-                                    .hallway
-                                    .iter()
-                                    .enumerate()
-                                    .filter_map(move |(z, _)| situation.room_to_hallway((i, j), z))
+                            (0..ROOM_LENGTH).flat_map(move |j| {
+                                (0..11).filter_map(move |z| situation.room_to_hallway((i, j), z))
                             })
                         })
                         .collect(),
@@ -368,45 +397,43 @@ fn get_least_energy_to_organize_amphipods(start: &Disposition) -> usize {
             }
 
             //best
-            // filter against best
             if let Some(local_best) = local_next_situations
                 .iter()
                 .filter(|s| s.disposition.is_finished())
                 .min_by_key(|s| s.score)
             {
-                println!("local best score {}", local_best.score);
-
                 if best_score.unwrap_or(usize::MAX) > local_best.score {
+                    best_finished = Some(local_best.clone());
                     best_score = Some(local_best.score);
-                    best_situation = Some(local_best.clone());
                 }
-
-                println!("best_score is now {:?}", best_score);
             }
 
+            // filter against known bests
             for s in local_next_situations {
-                if best_score.map(|score| score > s.score).unwrap_or(true)
+                if !s.disposition.is_finished()
+                    && best_score
+                        .map(|best_score| best_score > s.score)
+                        .unwrap_or(true)
                     && best_situations
                         .get(&s.disposition)
                         .map(|sit| sit.score > s.score)
                         .unwrap_or(true)
                 {
                     best_situations.insert(s.disposition, s.clone());
-                    // this way, next_situaitions are replaced on the fly if a better one is found
+                    // this way, next_situations are replaced on the fly if a better one is found
                     next_situations.insert(s.disposition, s.clone());
                 }
             }
         }
-        // FIXME : build a map situatiion => next_situations
         current_situations = next_situations.into_values().collect();
-        println!("next evaluation : {} candidates", current_situations.len())
+        // eprintln!("next evaluation : {} candidates", current_situations.len())
     }
 
-    let best = best_situation.unwrap();
-    for dispo in best.previous_disposition {
-        println!("{}\n\n", dispo)
+    #[cfg(debug_assertions)]
+    if let Some(best) = best_finished {
+        eprintln!("{}\n", best);
     }
-    println!("{}\n\n", best.disposition);
+
     best_score.unwrap_or(usize::MAX)
 }
 
@@ -418,17 +445,50 @@ pub fn organize_amphipods() {
   #D#C#B#B#
   #########";
 
-    let start: Disposition = input.parse().expect("failed to parse a Disposition");
+    let start: Disposition<2> = input.parse().expect("failed to parse a Disposition");
 
     println!(
         "Least energy to organize amphipods: {}",
         get_least_energy_to_organize_amphipods(&start)
+    );
+
+    let unfold_input = "\
+#############
+#...........#
+###D#A#C#A###
+  #D#C#B#A#
+  #D#B#A#C#
+  #D#C#B#B#
+  #########";
+
+    let new_start: Disposition<4> = unfold_input.parse().expect("failed to parse a Disposition");
+
+    println!(
+        "Least energy to organize all amphipods: {}",
+        get_least_energy_to_organize_amphipods(&new_start)
     );
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn room_place_are_vailable_in_order() {
+        let mut disposition: Disposition<2> = Disposition {
+            hallway: [None; 11],
+            rooms: [[None; 2]; 4],
+        };
+        disposition.rooms[1][1] = Some(Bronze);
+        disposition.rooms[2][1] = Some(Copper);
+        disposition.rooms[2][0] = Some(Copper);
+        disposition.rooms[3][1] = Some(Amber);
+
+        assert_eq!(Some(1), disposition.get_first_available_place(0));
+        assert_eq!(Some(0), disposition.get_first_available_place(1));
+        assert_eq!(None, disposition.get_first_available_place(2));
+        assert_eq!(None, disposition.get_first_available_place(3));
+    }
 
     #[test]
     fn aoc_example_works() {
@@ -438,19 +498,18 @@ mod tests {
 ###B#C#B#D###
   #A#D#C#A#
   #########    ";
-        let situation: Disposition = input.parse().expect("could not parse input as Situation");
-        assert_eq!(12521, get_least_energy_to_organize_amphipods(&situation));
-    }
+        let start: Disposition<2> = input.parse().expect("could not parse input as Situation");
+        assert_eq!(12521, get_least_energy_to_organize_amphipods(&start));
 
-    #[test]
-    fn my_value_works() {
         let input = "\
 #############
 #...........#
-###D#A#C#A###
-  #D#C#B#B#
+###B#C#B#D###
+  #D#C#B#A#
+  #D#B#A#C#
+  #A#D#C#A#
   #########  ";
-        let situation: Disposition = input.parse().expect("could not parse input as Situation");
-        assert!(19169 > get_least_energy_to_organize_amphipods(&situation));
+        let start: Disposition<4> = input.parse().expect("could not parse input as Situation");
+        assert_eq!(44169, get_least_energy_to_organize_amphipods(&start));
     }
 }
