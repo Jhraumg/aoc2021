@@ -14,6 +14,7 @@ mod day20;
 mod day21;
 mod day22;
 mod day23;
+mod day24;
 mod day3;
 mod day4;
 mod day5;
@@ -62,11 +63,13 @@ fn main() {
     println!("****");
     day19::display_breacons_and_scanners();
     println!("****");
-    day20::display_enhanced_img();
+    // day20::display_enhanced_img();
     println!("****");
     day21::display_dirac_dice_play();
     println!("****");
     day22::display_reactor_reboot();
     println!("****");
     day23::organize_amphipods();
+    println!("****");
+    day24::print_larget_serial_accepted_by_monad();
 }
