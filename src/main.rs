@@ -15,6 +15,7 @@ mod day21;
 mod day22;
 mod day23;
 mod day24;
+mod day25;
 mod day3;
 mod day4;
 mod day5;
@@ -23,54 +24,66 @@ mod day7;
 mod day8;
 mod day9;
 
+use colored::*;
+use itertools::Itertools;
+
 fn main() {
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day1::print_depth_incrs();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day2::print_position();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day3::print_power();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day4::display_bingo();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day5::print_hydrothermals();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day6::print_lanternfishes_counts();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day7::print_crab_alignment();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day8::display_digits();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day9::display_smoke_risks();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day10::print_syntax_check();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day11::display_octopuses_flash_count();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day12::display_pathes();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day13::print_origami_details();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day14::display_polymer();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day15::display_safest_path();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day16::print_bits();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day17::display_trajectory();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day18::display_additions();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day19::display_breacons_and_scanners();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day20::display_enhanced_img();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day21::display_dirac_dice_play();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day22::display_reactor_reboot();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day23::organize_amphipods();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
     day24::print_larget_serial_accepted_by_monad();
-    println!("****");
+    println!("{}", "****".truecolor(0, 255, 0));
+    day25::find_spot_on_sea_floor();
+    println!(
+        "{}",
+        vec!["*"; 26]
+            .iter()
+            .enumerate()
+            .map(|(i, s)| s.truecolor(i as u8 * 10, 255 - i as u8 * 10, i as u8 * 10))
+            .join("")
+    );
 }
