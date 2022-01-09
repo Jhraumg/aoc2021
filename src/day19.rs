@@ -281,7 +281,7 @@ fn max_manhattan_distance(scan_coords: &[ThreeDPoint]) -> usize {
 }
 
 pub fn display_breacons_and_scanners() {
-    let input = include_str!("../ressources/day19_scanners.txt");
+    let input = include_str!("../resources/day19_scanners.txt");
     let scanners = read_scanners(input);
 
     let (scanners, coordinates) = tune_scanners(&scanners);
@@ -447,7 +447,6 @@ mod tests {
 
     #[test]
     fn scandirsrs_can_be_rotated() {
-        let scanners = read_scanners(get_input());
         let refp = ThreeDPoint { x: 1, y: 2, z: 3 };
 
         assert_eq!(

@@ -250,7 +250,7 @@ fn reboot_unsized_reactor(input: &str) -> usize {
 }
 
 pub fn display_reactor_reboot() {
-    let input = include_str!("../ressources/day22_reboot_sequence.txt");
+    let input = include_str!("../resources/day22_reboot_sequence.txt");
     println!(
         "number of cubes lit after reboot sequence for 101*101*101 reactor : {}",
         reboot_sized_reactor(input)

@@ -98,7 +98,7 @@ fn count_steps_before_static(input: &str) -> usize {
 }
 
 pub fn find_spot_on_sea_floor() {
-    let input = include_str!("../ressources/day25_sea_floor.txt");
+    let input = include_str!("../resources/day25_sea_floor.txt");
     println!(
         "cucumbers stop moving after {} steps",
         count_steps_before_static(input)

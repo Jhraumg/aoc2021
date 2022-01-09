@@ -103,7 +103,7 @@ fn find_highest_position(target: &TargetArea) -> Option<isize> {
 }
 
 pub fn display_trajectory() {
-    let input = include_str!("../ressources/day17_targetarea.txt");
+    let input = include_str!("../resources/day17_targetarea.txt");
     let area = input.parse().unwrap();
     println!(
         "highest y position reachable : {}",

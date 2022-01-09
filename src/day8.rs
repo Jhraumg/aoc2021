@@ -334,7 +334,7 @@ fn sum_decoded(sources: &[DisplaysSource]) -> usize {
 }
 
 pub fn display_digits() {
-    let input = include_str!("../ressources/day8_digits_displays.txt");
+    let input = include_str!("../resources/day8_digits_displays.txt");
     let sources = parse_displays(input);
 
     println!(

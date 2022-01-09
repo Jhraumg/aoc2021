@@ -2,7 +2,6 @@ use itertools::Itertools;
 
 #[derive(Debug)]
 struct Diagnosis {
-    length: usize,
     gamma: usize,
     epsilon: usize,
     oxygen: usize,
@@ -95,7 +94,6 @@ impl Diagnosis {
         let co2 = Diagnosis::select_diag_from_rating(&inputs, |val, most| val != most);
 
         Diagnosis {
-            length,
             gamma,
             epsilon,
             oxygen,
@@ -105,7 +103,7 @@ impl Diagnosis {
 }
 
 pub fn print_power() {
-    let report = include_str!("../ressources/day3_diagnosis.txt");
+    let report = include_str!("../resources/day3_diagnosis.txt");
     let diag = Diagnosis::new(report);
     println!("diagnosis : {:?}", diag);
     println!("power : {:?}", diag.gamma * diag.epsilon);
@@ -136,7 +134,6 @@ mod tests {
         assert_eq!(1, Diagnosis::_epsilon(5, 0b11110));
 
         let full_diag = Diagnosis::new(report);
-        assert_eq!(5, full_diag.length);
         assert_eq!(22, full_diag.gamma);
         assert_eq!(9, full_diag.epsilon);
         assert_eq!(198, full_diag.gamma * full_diag.epsilon);

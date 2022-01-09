@@ -223,7 +223,7 @@ fn count_pathes_twice_visited(input: &'static str) -> usize {
 }
 
 pub fn display_pathes() {
-    let input = include_str!("../ressources/day12_connections.txt");
+    let input = include_str!("../resources/day12_connections.txt");
     println!("number of pathes : {}", count_pathes(input));
     println!(
         "number of path while visiting twice small places : {}",

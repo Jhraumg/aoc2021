@@ -207,7 +207,7 @@ impl Packet {
 }
 
 pub fn print_bits() {
-    let input = include_str!("../ressources/day16_bits.txt");
+    let input = include_str!("../resources/day16_bits.txt");
     println!(
         "summed BITS versions : {}",
         Packet::from_str(input).sum_version()

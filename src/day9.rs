@@ -117,14 +117,14 @@ fn multiply_bassins(heights: &[Vec<usize>]) -> usize {
 }
 
 pub fn display_smoke_risks() {
-    let input = include_str!("../ressources/day9_heights.txt");
+    let input = include_str!("../resources/day9_heights.txt");
     let heights = parse_heights(input);
     let risk = sum_low_point_risks(&heights);
 
     println!("sum of risk of all low points {}", risk);
 
     println!(
-        "product of 3 larghest bassins {}",
+        "product of 3 largest bassins {}",
         multiply_bassins(&heights)
     );
 }

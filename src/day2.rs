@@ -78,7 +78,7 @@ fn apply_aimed_plan(init_pos: &Position, plan: &str) -> Position {
 }
 
 pub fn print_position() {
-    let plan = include_str!("../ressources/day2_movements.txt");
+    let plan = include_str!("../resources/day2_movements.txt");
     let origin = Position::new();
     let target = apply_plan(&origin, plan);
     println!("target_position : {:?}", target);

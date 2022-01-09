@@ -218,14 +218,13 @@ Player 2 starting position: 5
 #[cfg(test)]
 mod tests {
     use super::*;
-    use itertools::Itertools;
 
     #[test]
     fn aoc_example_works() {
         let input = "Player 1 starting position: 4
 Player 2 starting position: 8";
 
-        let mut players: Vec<_> = input
+        let players: Vec<_> = input
             .lines()
             .filter_map(|l| l.parse::<Player>().ok())
             .collect();

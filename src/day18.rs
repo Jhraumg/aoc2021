@@ -248,7 +248,7 @@ fn get_max_magnitude_from_addition(numbers: &[FishNumber]) -> usize {
 }
 
 pub fn display_additions() {
-    let input = include_str!("../ressources/day18_fish_numbers.txt");
+    let input = include_str!("../resources/day18_fish_numbers.txt");
     let numbers: Vec<_> = input
         .lines()
         .filter_map(|l| FishNumber::try_read(l).ok())

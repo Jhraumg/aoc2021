@@ -45,7 +45,7 @@ fn count_lanternfishes_after(population: &str, duration: usize) -> usize {
     pop.count()
 }
 pub fn print_lanternfishes_counts() {
-    let lanternfishes = include_str!("../ressources/day6_lanternfishes.txt");
+    let lanternfishes = include_str!("../resources/day6_lanternfishes.txt");
     for d in [0, 80, 256] {
         println!(
             "after {} days, there are {} fishes",

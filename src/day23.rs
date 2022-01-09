@@ -175,6 +175,7 @@ impl<const ROOM_LENGTH: usize> Display for Situation<ROOM_LENGTH> {
 }
 
 impl<const ROOM_LENGTH: usize> Situation<ROOM_LENGTH> {
+    // source is used in debug mode to log all successive steps
     fn new(score: usize, disposition: Disposition<ROOM_LENGTH>, source: &Self) -> Self {
         #[cfg(debug_assertions)]
         let mut previous_disposition = source.previous_disposition.clone();

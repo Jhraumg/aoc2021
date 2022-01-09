@@ -102,7 +102,7 @@ fn count_dots_after_folding(input: &str, folds_count: usize) -> usize {
 }
 
 pub fn print_origami_details() {
-    let input = include_str!("../ressources/day13_transparent_paper.txt");
+    let input = include_str!("../resources/day13_transparent_paper.txt");
 
     println!(
         "number of dots after 1 fold {}",

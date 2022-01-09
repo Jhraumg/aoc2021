@@ -196,6 +196,7 @@ impl<'alu> ALU<'alu> {
 /// explore the solutions by step
 /// for each step, equivalent state is associated with its (min,max) data tuple
 /// conflating states at each step is not efficient enough, hence the one level Rayon only
+#[allow(dead_code)]
 fn get_largest_model_number_accepted_by_monad_breath_first(
     monad: &str,
     size: usize,
@@ -386,7 +387,7 @@ fn get_largest_model_number_accepted_by_monad_depth_first(
 }
 
 pub fn print_larget_serial_accepted_by_monad() {
-    let program = include_str!("../ressources/day24_monad.txt");
+    let program = include_str!("../resources/day24_monad.txt");
     let (min_checked, max_checked) =
         get_largest_model_number_accepted_by_monad_depth_first(program, 14);
     println!("largest serial accepted {}", max_checked);
@@ -428,7 +429,7 @@ mul x 0
 
     #[test]
     fn monad_works_for_small_serial() {
-        let program = include_str!("../ressources/day24_monad.txt");
+        let program = include_str!("../resources/day24_monad.txt");
         println!(
             "largest serial accepted {}",
             get_largest_model_number_accepted_by_monad_depth_first(program, 7).0
@@ -437,7 +438,7 @@ mul x 0
 
     #[test]
     fn monad_can_be_checked() {
-        let program = include_str!("../ressources/day24_monad.txt");
+        let program = include_str!("../resources/day24_monad.txt");
 
         let instructions = decode(program);
 
@@ -452,7 +453,7 @@ mul x 0
     #[cfg(not(debug_assertions))]
     #[test]
     fn monad_can_be_checked_breath_first() {
-        let program = include_str!("../ressources/day24_monad.txt");
+        let program = include_str!("../resources/day24_monad.txt");
         assert_eq!(
             (91811211611981, 92928914999991),
             get_largest_model_number_accepted_by_monad_breath_first(program, 14)
@@ -462,7 +463,7 @@ mul x 0
     #[cfg(not(debug_assertions))]
     #[test]
     fn monad_can_be_checked_depth_first() {
-        let program = include_str!("../ressources/day24_monad.txt");
+        let program = include_str!("../resources/day24_monad.txt");
         assert_eq!(
             (91811211611981, 92928914999991),
             get_largest_model_number_accepted_by_monad_depth_first(program, 14)

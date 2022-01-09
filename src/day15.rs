@@ -66,10 +66,10 @@ fn get_lowest_risk(input: &str, map_factor: usize) -> usize {
 }
 
 pub fn display_safest_path() {
-    let input = include_str!("../ressources/day15_risks.txt");
+    let input = include_str!("../resources/day15_risks.txt");
     println!("lowest_risk {}", get_lowest_risk(input, 1));
     println!(
-        "lowest_risk for {}expansion : {}",
+        "lowest_risk for {} expansion : {}",
         5,
         get_lowest_risk(input, 5)
     );

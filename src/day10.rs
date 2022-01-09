@@ -137,7 +137,7 @@ fn middle_completion_score(input: &'static str) -> usize {
 }
 
 pub fn print_syntax_check() {
-    let input = include_str!("../ressources/day10_navigation_syntax.txt");
+    let input = include_str!("../resources/day10_navigation_syntax.txt");
 
     println!("illegal score : {}", illegal_score(input));
     println!(

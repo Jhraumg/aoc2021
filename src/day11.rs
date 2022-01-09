@@ -70,7 +70,7 @@ fn get_first_all_flashed_step(input: &str) -> usize {
 }
 
 pub fn display_octopuses_flash_count() {
-    let input = include_str!("../ressources/day11_octopuses_energy.txt");
+    let input = include_str!("../resources/day11_octopuses_energy.txt");
     println!(
         "number of flashes after 100 steps {}",
         sum_flashes(input, 100)

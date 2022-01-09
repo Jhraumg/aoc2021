@@ -85,7 +85,7 @@ impl Polymer {
 }
 
 pub fn display_polymer() {
-    let input = include_str!("../ressources/day14_chemistry.txt");
+    let input = include_str!("../resources/day14_chemistry.txt");
 
     let mut polymer = Polymer::parse(input);
     for i in 1..5 {

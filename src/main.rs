@@ -24,60 +24,128 @@ mod day7;
 mod day8;
 mod day9;
 
+use std::time::{Duration, Instant};
+
 use colored::*;
 use itertools::Itertools;
 
+struct Timer {
+    start: Instant,
+    last: Instant,
+}
+impl Timer {
+    fn new() -> Self {
+        let instant = Instant::now();
+        Self {
+            last: instant,
+            start: instant,
+        }
+    }
+
+    fn click(&mut self) {
+        static ONE_SECOND: Duration = Duration::from_secs(1);
+        let elapsed = self.last.elapsed();
+        if elapsed > ONE_SECOND {
+            println!(
+                "{}\n",
+                format!("*** {} s ***", elapsed.as_secs()).truecolor(255, 128, 0)
+            );
+        } else {
+            println!(
+                "{}\n",
+                format!("*** {} ms ***", elapsed.as_millis()).truecolor(0, 255, 0)
+            );
+        }
+
+        self.last = Instant::now();
+    }
+
+    fn display_total(&self) {
+        println!(
+            "{}",
+            format!("*** TOTAL : {} s ***", self.start.elapsed().as_secs()).truecolor(0, 255, 0)
+        );
+    }
+}
+
 fn main() {
-    println!("{}", "****".truecolor(0, 255, 0));
+    let mut timer = Timer::new();
+    println!("{}", "********".truecolor(0, 255, 0));
     day1::print_depth_incrs();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day2::print_position();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day3::print_power();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day4::display_bingo();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day5::print_hydrothermals();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day6::print_lanternfishes_counts();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day7::print_crab_alignment();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day8::display_digits();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day9::display_smoke_risks();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day10::print_syntax_check();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day11::display_octopuses_flash_count();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day12::display_pathes();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day13::print_origami_details();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day14::display_polymer();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day15::display_safest_path();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day16::print_bits();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day17::display_trajectory();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day18::display_additions();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day19::display_breacons_and_scanners();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day20::display_enhanced_img();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day21::display_dirac_dice_play();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day22::display_reactor_reboot();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day23::organize_amphipods();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day24::print_larget_serial_accepted_by_monad();
-    println!("{}", "****".truecolor(0, 255, 0));
+    timer.click();
+
     day25::find_spot_on_sea_floor();
+    timer.click();
+    timer.display_total();
     println!(
         "{}",
         vec!["*"; 26]

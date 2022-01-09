@@ -108,7 +108,7 @@ fn count_overlapped_more_than_twice(vents: &str, dir: Directions) -> usize {
 }
 
 pub fn print_hydrothermals() {
-    let vents = include_str!("../ressources/day5_hydrothermal_vents.txt");
+    let vents = include_str!("../resources/day5_hydrothermal_vents.txt");
     println!(
         "considering horizontal and vertical lines only, {} places are overlapsed more than once",
         count_overlapped_more_than_twice(vents, Directions::HorzVert)

@@ -124,7 +124,7 @@ impl Enhancer {
     }
 }
 pub fn display_enhanced_img() {
-    let input = include_str!("../ressources/day20_enhancer.txt");
+    let input = include_str!("../resources/day20_enhancer.txt");
 
     let mut lines = input.lines();
 
@@ -176,7 +176,7 @@ mod tests {
         assert_eq!(2, Enhancer::count_3x3_lit_pixels(&img, (3, 1)));
 
         assert_eq!(1, Enhancer::get_index_from_3x3_lit_pixels(&img, (-1, -1)));
-        /// 111000111
+        // 111000111
         assert_eq!(455, Enhancer::get_index_from_3x3_lit_pixels(&img, (1, 1)));
 
         // 000011000

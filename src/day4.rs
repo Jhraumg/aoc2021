@@ -1,10 +1,18 @@
 use itertools::Itertools;
-use std::fmt;
+use std::fmt::{self, Display};
 
 #[derive(Debug)]
 pub struct BingoResult {
     winner_idx: usize,
     winner_score: usize,
+}
+impl Display for BingoResult {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_fmt(format_args!(
+            "win at {}, score : {}",
+            self.winner_idx, self.winner_score
+        ))
+    }
 }
 
 pub(crate) struct BingoBoard {
@@ -194,9 +202,12 @@ pub fn play_bingo(bingo: &str) -> (BingoResult, BingoResult) {
 }
 
 pub fn display_bingo() {
-    let bingo = include_str!("../ressources/day4_bingo.txt");
+    let bingo = include_str!("../resources/day4_bingo.txt");
     let result = play_bingo(bingo);
-    println!("result {:?}", result);
+    println!(
+        "***Bingo results : ***\n* first win :{}\n* last win : {}",
+        result.0, result.1
+    );
 }
 #[cfg(test)]
 mod tests {
